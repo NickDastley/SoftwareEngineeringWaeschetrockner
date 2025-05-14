@@ -43,7 +43,3 @@ Dieses Dokument beschreibt die funktionalen und nicht-funktionalen Anforderungen
 ## Änderungs- und Versionsverfolgung
 Alle Änderungen an diesem Dokument sind über Git und Pull Requests nachvollziehbar. Änderungen an Requirements sollen mit nachvollziehbaren Commits dokumentiert werden.
 
----
-
-## Traceability
-Traceability-Matrix wird separat gepflegt: `traceability_matrix.md` (optional).
