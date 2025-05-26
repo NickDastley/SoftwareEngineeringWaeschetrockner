@@ -8,7 +8,7 @@ repositories {
 }
 
 application {
-    mainClass.set("org.example.Main")
+    mainClass.set("clothdryer.Main")
 }
 
 javafx {

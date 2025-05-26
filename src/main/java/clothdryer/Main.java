@@ -1,4 +1,4 @@
-package org.example;
+package clothdryer;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -9,7 +9,7 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) {
         Label label = new Label("JavaFX läuft!");
-        Scene scene = new Scene(label, 400, 300);
+        Scene scene = new ProgramSelectionScene(stage).getScene();
         stage.setScene(scene);
         stage.setTitle("Test");
         stage.show();
