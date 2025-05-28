@@ -9,11 +9,18 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class RunningSceneTest extends ApplicationTest {
     private Stage stage;
+    private ProgramManager programManager;
 
     @Override
     public void start(Stage stage) {
         this.stage = stage;
-        ProgramSelectionScene selectionScene = new ProgramSelectionScene(stage);
+        programManager = new ProgramManager();
+
+        Thread managerThread = new Thread(programManager);
+        managerThread.setDaemon(true); // Ensure the thread doesn't block application exit
+        managerThread.start();
+
+        ProgramSelectionScene selectionScene = new ProgramSelectionScene(stage, programManager);
         stage.setScene(selectionScene.getScene());
         stage.show();
         clickOn("Baumwolle");

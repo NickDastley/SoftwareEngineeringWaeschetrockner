@@ -10,11 +10,19 @@ import static org.junit.jupiter.api.Assertions.*;
 class ProgramSelectionTest extends ApplicationTest {
 
     private Stage stage;
+    private ProgramManager programManager;
+    private DryerState dryerState;
 
     @Override
     public void start(Stage stage) {
         this.stage = stage;
-        ProgramSelectionScene selectionScene = new ProgramSelectionScene(stage);
+
+        programManager = new ProgramManager();
+        Thread managerThread = new Thread(programManager);
+        managerThread.setDaemon(true); // Ensure the thread doesn't block application exit
+        managerThread.start();
+
+        ProgramSelectionScene selectionScene = new ProgramSelectionScene(stage, programManager);
         stage.setScene(selectionScene.getScene());
         stage.show();
     }

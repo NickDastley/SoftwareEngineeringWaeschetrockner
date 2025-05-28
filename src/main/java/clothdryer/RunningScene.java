@@ -11,9 +11,13 @@ public class RunningScene {
     private final Stage stage;
     private final String programName;
 
-    public RunningScene(Stage stage, String programName) {
+    private final ProgramManager programManager;
+
+    public RunningScene(Stage stage, String programName, ProgramManager programManager) {
         this.stage = stage;
         this.programName = programName;
+
+        this.programManager = programManager;
     }
 
     public Scene getScene() {
@@ -25,7 +29,7 @@ public class RunningScene {
 
         Button cancel = new Button("Abbrechen");
         cancel.setOnAction(e -> {
-            ProgramSelectionScene programSelectionScene = new ProgramSelectionScene(stage);
+            ProgramSelectionScene programSelectionScene = new ProgramSelectionScene(stage, programManager);
             stage.setScene(programSelectionScene.getScene());
         });
 
