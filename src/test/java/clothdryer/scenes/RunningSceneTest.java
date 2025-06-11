@@ -1,5 +1,6 @@
-package clothdryer;
+package clothdryer.scenes;
 
+import clothdryer.ProgramManager;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.Test;
