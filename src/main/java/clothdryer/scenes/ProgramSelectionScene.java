@@ -1,15 +1,29 @@
 package clothdryer.scenes;
 
 import clothdryer.ProgramManager;
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 public class ProgramSelectionScene {
 
     private final Stage stage;
     private final ProgramManager programManager;
+
+    private Label doorStatusLabel;
+    private Button doorButton;
+    private Button cottonButton;
+    private Button syntheticButton;
+    private Button woolButton;
+    private Timeline updateTimeline;
 
     public ProgramSelectionScene(Stage stage, ProgramManager programManager) {
         this.stage = stage;
@@ -19,9 +33,9 @@ public class ProgramSelectionScene {
     public Scene getScene() {
         Label headline = new Label("Wähle ein Trockenprogramm:");
 
-        Button cottonButton = new Button("Baumwolle");
-        Button syntheticButton = new Button("Synthetik");
-        Button woolButton = new Button("Wolle");
+        cottonButton = new Button("Baumwolle");
+        syntheticButton = new Button("Synthetik");
+        woolButton = new Button("Wolle");
 
         cottonButton.setOnAction(e -> {
             String selectedProgram = "cotton";
@@ -39,8 +53,62 @@ public class ProgramSelectionScene {
             stage.setScene(runningScene.getScene());
         });
 
-        VBox layout = new VBox(15, headline, cottonButton, syntheticButton, woolButton);
+        doorStatusLabel = new Label(getDoorStatusText());
+        doorButton = new Button(getDoorButtonText());
+        doorButton.setOnAction(e -> toggleDoorState());
+
+        HBox doorControls = new HBox(10, doorStatusLabel, doorButton);
+        doorControls.setAlignment(Pos.CENTER);
+
+        VBox layout = new VBox(15, headline, cottonButton, syntheticButton, woolButton, doorControls);
         layout.setStyle("-fx-padding: 20; -fx-alignment: center");
+        startUpdateTimeline();
         return new Scene(layout, 400, 300);
+    }
+
+    private void startUpdateTimeline() {
+        updateTimeline = new Timeline(
+                new KeyFrame(Duration.seconds(0.5), event -> {
+                    updateDoorControls();
+                })
+        );
+        updateTimeline.setCycleCount(Animation.INDEFINITE);
+        updateTimeline.play();
+    }
+
+
+    private void updateDoorControls() {
+        doorStatusLabel.setText(getDoorStatusText());
+        doorButton.setText(getDoorButtonText());
+        doorButton.setDisable(programManager.isDoorLocked());
+    }
+
+    private String getDoorStatusText() {
+        if (programManager.isDoorLocked()) {
+            return "Tür: Verriegelt";
+        } else if (programManager.isDoorClosed()) {
+            return "Tür: Geschlossen";
+        } else {
+            return "Tür: Geöffnet";
+        }
+    }
+
+    private String getDoorButtonText() {
+        return programManager.isDoorClosed() ? "Tür öffnen" : "Tür schließen";
+    }
+
+    private void toggleDoorState() {
+        if (programManager.isDoorClosed()) {
+            programManager.tryOpenDoor();
+        } else {
+            programManager.closeDoor();
+        }
+
+        boolean doorClosed = programManager.isDoorClosed();
+        cottonButton.setDisable(!doorClosed);
+        syntheticButton.setDisable(!doorClosed);
+        woolButton.setDisable(!doorClosed);
+
+        updateDoorControls();
     }
 }

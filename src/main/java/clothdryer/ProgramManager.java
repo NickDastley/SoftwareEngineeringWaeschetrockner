@@ -5,10 +5,12 @@ public class ProgramManager implements Runnable {
     private final DryerState state;
     private final DryerSimulation simulation;
     private long lastUpdateTime;
+    private final SafetyModule safetyModule;
 
     public ProgramManager() {
         this.state = new DryerState();
-        this.simulation = new DryerSimulation(state);
+        this.safetyModule = new SafetyModule(state);
+        this.simulation = new DryerSimulation(state, safetyModule);
         this.lastUpdateTime = System.currentTimeMillis();
     }
 
@@ -59,6 +61,22 @@ public class ProgramManager implements Runnable {
 
         simulation.updateState(elapsedMilliseconds);
         lastUpdateTime = currentTime;
+    }
+
+    public boolean tryOpenDoor() {
+        return simulation.tryOpenDoor();
+    }
+
+    public void closeDoor() {
+        simulation.closeDoor();
+    }
+
+    public boolean isDoorLocked() {
+        return simulation.isDoorLocked();
+    }
+
+    public boolean isDoorClosed() {
+        return simulation.isDoorClosed();
     }
 }
 

@@ -4,12 +4,14 @@ public class DryerState {
 
     private String programName = "None";
     public enum ProgramStatus {
-        IDLE, RUNNING, FINISHED, ERROR
+        IDLE, RUNNING, FINISHED, ERROR, DOOR_OPEN
     }
     private ProgramStatus status;
     private int remainingSeconds = 0;
     private double temperature = 0.0;
     private double humidity = 100.0;
+    private boolean doorClosed = true;
+    private boolean doorLocked = false;
 
     public DryerState() {
         status = ProgramStatus.IDLE;
@@ -53,5 +55,21 @@ public class DryerState {
 
     public synchronized void setHumidity(double humidity) {
         this.humidity = humidity;
+    }
+
+    public synchronized boolean isDoorClosed() {
+        return doorClosed;
+    }
+
+    public synchronized void setDoorClosed(boolean doorClosed) {
+        this.doorClosed = doorClosed;
+    }
+
+    public synchronized void setDoorLocked(boolean doorLocked) {
+        this.doorLocked = doorLocked;
+    }
+
+    public synchronized boolean isDoorLocked() {
+        return doorLocked;
     }
 }

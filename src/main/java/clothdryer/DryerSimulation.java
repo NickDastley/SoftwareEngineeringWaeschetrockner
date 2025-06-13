@@ -1,6 +1,5 @@
 package clothdryer;
 
-import clothdryer.DryerState;
 import clothdryer.DryerState.ProgramStatus;
 
 public class DryerSimulation {
@@ -21,41 +20,48 @@ public class DryerSimulation {
     private static final int TIME_WOOL = 1800;      // 30 Minuten
 
     private final DryerState dryerState;
+    private final SafetyModule safetyModule;
     private boolean heatingActive = false;
     private double humidityDecreaseRate = 0.0;
     private double targetTemperature = 0.0;
 
-    public DryerSimulation(DryerState dryerState) {
+    public DryerSimulation(DryerState dryerState, SafetyModule safetyModule) {
         this.dryerState = dryerState;
+        this.safetyModule = safetyModule;
     }
 
     public void startProgram(String programName) {
+        if (!safetyModule.isOperationAllowed()) {
+            throw new IllegalStateException("Operation not allowed: Door is open or locked.");
+        }
         configureProgramParameters(programName);
         dryerState.setStatus(ProgramStatus.RUNNING);
+        safetyModule.updateDoorLock();
     }
 
     public void stopProgram() {
         heatingActive = false;
         dryerState.setStatus(ProgramStatus.IDLE);
+        safetyModule.updateDoorLock();
     }
 
     private void configureProgramParameters(String programName) {
         switch (programName) {
-            case "cotton":
+            case "cotton" -> {
                 humidityDecreaseRate = HUMIDITY_DECREASE_RATE_COTTON;
                 targetTemperature = MAX_TEMP_COTTON;
                 dryerState.setRemainingSeconds(TIME_COTTON);
-                break;
-            case "synthetic":
+            }
+            case "synthetic" -> {
                 humidityDecreaseRate = HUMIDITY_DECREASE_RATE_SYNTHETIC;
                 targetTemperature = MAX_TEMP_SYNTHETIC;
                 dryerState.setRemainingSeconds(TIME_SYNTHETIC);
-                break;
-            case "wool":
+            }
+            case "wool" -> {
                 humidityDecreaseRate = HUMIDITY_DECREASE_RATE_WOOL;
                 targetTemperature = MAX_TEMP_WOOL;
                 dryerState.setRemainingSeconds(TIME_WOOL);
-                break;
+            }
         }
         dryerState.setProgramName(programName);
         heatingActive = true;
@@ -66,19 +72,14 @@ public class DryerSimulation {
             return;
         }
 
-        // Aktualisiere Temperatur
         updateTemperature(elapsedTimeMs / 1000.0);
-
-        // Aktualisiere Feuchtigkeit
-        updateHumidity(elapsedTimeMs / 1000.0 * 10);
-
-        // Aktualisiere Restzeit
+        updateHumidity(elapsedTimeMs / 1000.0);
         updateRemainingTime(elapsedTimeMs / 1000.0);
 
-        // Prüfe auf Überhitzung
-        checkOverheating();
+        if (safetyModule.isOverheating()) {
+            heatingActive = false;
+        }
 
-        // Prüfe, ob Programm beendet ist
         checkProgramFinished();
     }
 
@@ -86,13 +87,11 @@ public class DryerSimulation {
         double currentTemp = dryerState.getTemperature();
 
         if (heatingActive) {
-            // Erhöhe Temperatur, wenn Heizung aktiv ist
             if (currentTemp < targetTemperature) {
                 double newTemp = currentTemp + (TEMP_INCREASE_RATE * elapsedTimeSec);
                 dryerState.setTemperature(Math.min(newTemp, targetTemperature));
             }
         } else {
-            // Verringere Temperatur, wenn Heizung inaktiv ist
             if (currentTemp > 0) {
                 double newTemp = currentTemp - (TEMP_DECREASE_RATE * elapsedTimeSec);
                 dryerState.setTemperature(Math.max(0, newTemp));
@@ -104,7 +103,6 @@ public class DryerSimulation {
         double currentHumidity = dryerState.getHumidity();
 
         if (heatingActive && currentHumidity > 0) {
-            // Verringere Feuchtigkeit basierend auf dem aktuellen Programm
             double newHumidity = currentHumidity - (humidityDecreaseRate * elapsedTimeSec);
             dryerState.setHumidity(Math.max(0, newHumidity));
         }
@@ -118,21 +116,35 @@ public class DryerSimulation {
         }
     }
 
-    private void checkOverheating() {
-        if (dryerState.getTemperature() > 85.0) {
-            dryerState.setStatus(ProgramStatus.ERROR);
-            heatingActive = false;
-        }
-    }
-
     private void checkProgramFinished() {
         if (dryerState.getHumidity() <= 5.0 || dryerState.getRemainingSeconds() <= 0) {
             dryerState.setStatus(ProgramStatus.FINISHED);
             heatingActive = false;
+            safetyModule.updateDoorLock();
         }
     }
 
-    public boolean isHeatingActive() {
+    public boolean tryOpenDoor() {
+        return safetyModule.tryOpenDoor();
+    }
+
+    public void closeDoor() {
+        safetyModule.closeDoor();
+    }
+
+    public boolean isDoorLocked() {
+        return dryerState.isDoorLocked();
+    }
+
+    public boolean isDoorClosed() {
+        return dryerState.isDoorClosed();
+    }
+
+    public boolean isSafeToOpen() {
+        return safetyModule.isSafeToOpen();
+    }
+
+        public boolean isHeatingActive() {
         return heatingActive;
     }
 
