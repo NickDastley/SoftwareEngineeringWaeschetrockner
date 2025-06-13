@@ -44,6 +44,7 @@ public class ProgramManager implements Runnable {
         return state;
     }
 
+    @Override
     public void run() {
         while (!Thread.currentThread().isInterrupted()) {
             refreshState();

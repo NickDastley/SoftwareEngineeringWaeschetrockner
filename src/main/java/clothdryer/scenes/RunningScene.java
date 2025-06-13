@@ -90,22 +90,22 @@ public class RunningScene {
     }
 
     private String formatProgramName(String name) {
-        switch (name) {
-            case "cotton": return "Baumwolle";
-            case "synthetic": return "Synthetik";
-            case "wool": return "Wolle";
-            default: return name;
-        }
+        return switch (name) {
+            case "cotton" -> "Baumwolle";
+            case "synthetic" -> "Synthetik";
+            case "wool" -> "Wolle";
+            default -> name;
+        };
     }
 
     private String formatStatus(DryerState.ProgramStatus status) {
-        switch (status) {
-            case IDLE: return "Bereit";
-            case RUNNING: return "Läuft";
-            case FINISHED: return "Abgeschlossen";
-            case ERROR: return "Fehler";
-            default: return "Unbekannt";
-        }
+        return switch (status) {
+            case IDLE -> "Bereit";
+            case RUNNING -> "Läuft";
+            case FINISHED -> "Abgeschlossen";
+            case ERROR -> "Fehler";
+            default -> "Unbekannt";
+        };
     }
 
     private String formatTime(int seconds) {
