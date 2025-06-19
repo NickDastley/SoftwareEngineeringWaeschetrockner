@@ -40,9 +40,6 @@ public class DryerSimulation {
         dryerState.setStatus(ProgramStatus.IDLE);
         dryerState.setTemperature(0.0);
         
-        // Always start with 100% humidity regardless of "Load New Laundry" button
-        dryerState.setHumidity(100.0);
-        
         // Configure program parameters to set the correct duration
         configureProgramParameters(programName);
         
