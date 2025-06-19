@@ -6,6 +6,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+/**
+ * Testklasse für das SafetyModule
+ *
+ * Traceability:
+ * - TC-002: Start- und Stop-Logik
+ * - TC-003: Überhitzungsschutz
+ * - TC-009: Abkühlfunktion
+ */
 public class SafetyModuleTest {
     
     private DryerState dryerState;
@@ -17,7 +25,7 @@ public class SafetyModuleTest {
         safetyModule = new SafetyModule(dryerState);
     }
     
-    @Test
+    @Test // TC-002
     void testDoorLocksWhenProgramIsRunning() {
         // Setup: Door closed, program not running
         dryerState.setDoorClosed(true);
@@ -32,7 +40,7 @@ public class SafetyModuleTest {
         assertTrue(dryerState.isDoorLocked(), "Door should be locked when program is running");
     }
 
-    @Test
+    @Test // TC-002
     void testDoorCannotBeOpenedWhenLocked() {
         // Setup: Door closed and locked
         dryerState.setDoorClosed(true);
@@ -46,7 +54,7 @@ public class SafetyModuleTest {
         assertTrue(dryerState.isDoorClosed(), "Door should remain closed when it is locked");
     }
 
-    @Test
+    @Test // TC-009
     void testDoorCanBeOpenedWhenTemperatureBelowThreshold() {
         // Setup: Door closed, not locked, temperature below threshold
         dryerState.setDoorClosed(true);
@@ -64,7 +72,7 @@ public class SafetyModuleTest {
         assertFalse(dryerState.isDoorClosed(), "Door should not be closed after opening");
     }
 
-    @Test
+    @Test // TC-003
     void testOverheatingDetection() {
         // Setup: Temperature below overheating threshold
         dryerState.setTemperature(90.0);
@@ -77,9 +85,10 @@ public class SafetyModuleTest {
         
         // Verification: Overheating detected
         assertTrue(safetyModule.isOverheating(), "At 105°C, overheating should be detected");
+        assertEquals(DryerState.ProgramStatus.ERROR, dryerState.getStatus(), "Status should be ERROR after overheating");
     }
     
-    @Test
+    @Test // TC-002
     void testOperationAllowedOnlyWithClosedDoor() {
         // Setup: Door open
         dryerState.setDoorClosed(false);
@@ -94,7 +103,7 @@ public class SafetyModuleTest {
         assertTrue(safetyModule.isOperationAllowed(), "Operation should be allowed when door is closed");
     }
     
-    @Test
+    @Test // TC-002
     void testDoorStatusChangeUpdatesProgram() {
         // Setup: Door closed, status IDLE
         dryerState.setDoorClosed(true);

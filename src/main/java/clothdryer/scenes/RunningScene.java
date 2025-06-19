@@ -106,7 +106,8 @@ public class RunningScene {
 
         // If the program is finished or an error occurred, return to the selection scene after a short delay
         if (state.getStatus() == DryerState.ProgramStatus.IDLE ||
-                state.getStatus() == DryerState.ProgramStatus.ERROR) {
+                state.getStatus() == DryerState.ProgramStatus.ERROR ||
+                state.getStatus() == DryerState.ProgramStatus.COOLING) {
 
             if (updateTimeline != null) {
                 updateTimeline.stop();

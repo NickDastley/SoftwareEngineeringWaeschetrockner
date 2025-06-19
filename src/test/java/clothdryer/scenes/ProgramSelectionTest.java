@@ -9,6 +9,12 @@ import org.testfx.framework.junit5.ApplicationTest;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Testklasse für die Programmauswahl-Szene
+ *
+ * Traceability:
+ * - TC-001: Programmauswahl
+ */
 class ProgramSelectionTest extends ApplicationTest {
 
     private Stage stage;
@@ -29,7 +35,7 @@ class ProgramSelectionTest extends ApplicationTest {
         stage.show();
     }
 
-    @Test
+    @Test // TC-001
     void testCottonButtonSwitchesToRunningScene() {
         clickOn("Baumwolle");
         Scene currentScene = stage.getScene();
@@ -37,7 +43,7 @@ class ProgramSelectionTest extends ApplicationTest {
                 .anyMatch(node -> ((javafx.scene.control.Label) node).getText().toLowerCase().contains("cotton")));
     }
 
-    @Test
+    @Test // TC-001
     void testSyntheticsButtonSwitchesToRunningScene() {
         clickOn("Synthetik");
         Scene currentScene = stage.getScene();
@@ -45,7 +51,7 @@ class ProgramSelectionTest extends ApplicationTest {
                 .anyMatch(node -> ((javafx.scene.control.Label) node).getText().toLowerCase().contains("synthetic")));
     }
 
-    @Test
+    @Test // TC-001
     void testWoolButtonSwitchesToRunningScene() {
         clickOn("Wolle");
         Scene currentScene = stage.getScene();

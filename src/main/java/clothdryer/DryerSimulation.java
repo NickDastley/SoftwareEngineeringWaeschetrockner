@@ -124,43 +124,41 @@ public class DryerSimulation {
      * @param elapsedTimeMs elapsed time in milliseconds since last update
      */
     public void updateState(int elapsedTimeMs) {
-        // If the program is running or idle, update values
-        if (dryerState.getStatus() == ProgramStatus.RUNNING || 
-            dryerState.getStatus() == ProgramStatus.IDLE) {
-            
-            // No heating when idle
-            if (dryerState.getStatus() == ProgramStatus.IDLE) {
-                heatingActive = false;
-            }
-            
-            // Always update temperature, even when idle, to allow cooling
+        // Temperatur und Status immer aktualisieren, solange nicht ERROR oder DOOR_OPEN
+        if (dryerState.getStatus() != ProgramStatus.ERROR &&
+            dryerState.getStatus() != ProgramStatus.DOOR_OPEN) {
+
+            // Immer Temperatur aktualisieren
             updateTemperature(elapsedTimeMs / 1000.0);
 
-            if (dryerState.getStatus() == ProgramStatus.RUNNING) {
-                updateHumidity(elapsedTimeMs / 1000.0);
-                updateRemainingTime(elapsedTimeMs / 1000.0);
-                
-                if (safetyModule.isOverheating()) {
+            if (null != dryerState.getStatus()) switch (dryerState.getStatus()) {
+                case RUNNING:
+                    updateHumidity(elapsedTimeMs / 1000.0);
+                    updateRemainingTime(elapsedTimeMs / 1000.0);
+                    if (safetyModule.isOverheating()) {
+                        heatingActive = false;
+                        return;
+                    }   boolean programFinished = checkProgramFinished();
+                    if (programFinished) {
+                        dryerState.setStatus(ProgramStatus.COOLING);
+                        heatingActive = false;
+                        safetyModule.updateDoorLock();
+                    }   break;
+                case COOLING:
+                    if (dryerState.getTemperature() > SafetyModule.SAFE_DOOR_TEMPERATURE) {
+                        dryerState.setDoorLocked(true);
+                    } else {
+                        dryerState.setDoorLocked(false);
+                        dryerState.setStatus(ProgramStatus.IDLE);
+                    }   break;
+                case IDLE:
                     heatingActive = false;
-                    return;
-                }
-                
-                boolean programFinished = checkProgramFinished();
-                if (programFinished) {
-                    dryerState.setStatus(ProgramStatus.COOLING);
-                    heatingActive = false;
-                    safetyModule.updateDoorLock();
-                }
-            } else if (dryerState.getStatus() == ProgramStatus.COOLING) {
-                if (dryerState.getTemperature() > SafetyModule.SAFE_DOOR_TEMPERATURE) {
-                    dryerState.setDoorLocked(true);
-                } else {
-                    dryerState.setDoorLocked(false);
-                    dryerState.setStatus(ProgramStatus.IDLE);
-                }
+                    break;
+                default:
+                    break;
             }
         }
-        
+
         // Always update door lock status
         safetyModule.updateDoorLock();
     }
@@ -258,7 +256,8 @@ public class DryerSimulation {
      */
     private boolean checkProgramFinished() {
         if (dryerState.getHumidity() <= TARGET_HUMIDITY || dryerState.getRemainingSeconds() <= 0) {
-            dryerState.setStatus(ProgramStatus.IDLE);
+            // Statt IDLE auf COOLING setzen
+            dryerState.setStatus(ProgramStatus.COOLING);
             heatingActive = false;
             safetyModule.updateDoorLock();
             return true;

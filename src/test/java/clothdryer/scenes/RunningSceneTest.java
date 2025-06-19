@@ -8,6 +8,12 @@ import org.testfx.framework.junit5.ApplicationTest;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Testklasse für die RunningScene (Programmlauf)
+ *
+ * Traceability:
+ * - TC-006: Programmabbruch durch Benutzer
+ */
 public class RunningSceneTest extends ApplicationTest {
     private Stage stage;
     private ProgramManager programManager;
@@ -27,7 +33,7 @@ public class RunningSceneTest extends ApplicationTest {
         clickOn("Baumwolle");
     }
 
-    @Test
+    @Test // TC-006
     void testCancelButtonReturnsToProgramSelection() {
         clickOn("Abbrechen");
         Scene currentScene = stage.getScene();
