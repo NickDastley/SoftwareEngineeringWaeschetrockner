@@ -26,6 +26,10 @@ public class DryerSimulation {
     private double targetTemperature = 0.0;
     private int initialTimeForProgram = 0;
 
+    private double previousHumidity = 0;
+    private double previousUpdateTime = 0;
+    private static final double TARGET_HUMIDITY = 5.0; // Program finishes when humidity reaches this level
+
     public DryerSimulation(DryerState dryerState, SafetyModule safetyModule) {
         this.dryerState = dryerState;
         this.safetyModule = safetyModule;
@@ -149,23 +153,51 @@ public class DryerSimulation {
     }
 
     private void updateRemainingTime(double elapsedTimeSec) {
-        int remainingTime = dryerState.getRemainingSeconds();
-
-        if (remainingTime > 0) {
-            double humidityFactor = dryerState.getHumidity() / 100.0;
-            int calculatedRemainingTime = (int)(initialTimeForProgram * humidityFactor);
+        double currentTime = System.currentTimeMillis() / 1000.0;
+        double currentHumidity = dryerState.getHumidity();
+        
+        // Skip the first update to establish a baseline
+        if (previousUpdateTime > 0 && previousHumidity > 0) {
+            double timeDelta = currentTime - previousUpdateTime;
+            double humidityDelta = previousHumidity - currentHumidity;
             
-            int newRemainingSeconds = Math.min(
-                Math.max(0, (int)(remainingTime - elapsedTimeSec)),
-                calculatedRemainingTime
-            );
+            // Calculate drying rate (humidity decrease per second)
+            double dryingRate = (timeDelta > 0) ? humidityDelta / timeDelta : 0;
             
-            dryerState.setRemainingSeconds(newRemainingSeconds);
+            // Only update estimate if we have a positive drying rate
+            if (dryingRate > 0) {
+                // Calculate remaining time based on current drying rate
+                double remainingHumidityToRemove = currentHumidity - TARGET_HUMIDITY;
+                int estimatedRemainingSeconds = (int)(remainingHumidityToRemove / dryingRate);
+                
+                // Set a floor and ceiling to avoid extreme values
+                estimatedRemainingSeconds = Math.max(5, estimatedRemainingSeconds);
+                estimatedRemainingSeconds = Math.min(initialTimeForProgram, estimatedRemainingSeconds);
+                
+                dryerState.setRemainingSeconds(estimatedRemainingSeconds);
+            } else {
+                // If no drying progress, just decrease time linearly
+                int remainingTime = dryerState.getRemainingSeconds();
+                dryerState.setRemainingSeconds(Math.max(0, (int)(remainingTime - elapsedTimeSec)));
+            }
+        } else if (previousUpdateTime == 0) {
+            // First update, initialize with default time
+            previousUpdateTime = currentTime;
+            previousHumidity = currentHumidity;
+        }
+        
+        // Update values for next calculation
+        previousUpdateTime = currentTime;
+        previousHumidity = currentHumidity;
+        
+        // Check if program should finish based on humidity
+        if (currentHumidity <= TARGET_HUMIDITY) {
+            checkProgramFinished();
         }
     }
 
     private void checkProgramFinished() {
-        if (dryerState.getHumidity() <= 5.0 || dryerState.getRemainingSeconds() <= 0) {
+        if (dryerState.getHumidity() <= TARGET_HUMIDITY || dryerState.getRemainingSeconds() <= 0) {
             dryerState.setStatus(ProgramStatus.IDLE);
             heatingActive = false;
             safetyModule.updateDoorLock();
