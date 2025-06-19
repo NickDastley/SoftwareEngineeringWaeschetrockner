@@ -66,11 +66,12 @@ src/
 
 ## Bedienung
 
-- Nach dem Start erscheint die Programmauswahl.
-- Die Tür kann geöffnet/geschlossen werden, neue Wäsche kann eingelegt werden.
-- Ein Programm kann nur bei geschlossener Tür gestartet werden.
-- Während des Programms ist die Tür verriegelt.
-- Das Programm kann jederzeit abgebrochen werden.
+1. Nach dem Start erscheint die Programmauswahl.
+2. Baumwolle, Synthetik oder Wolle auswählen (nur bei geschlossener Tür).
+3. Die Tür kann über die UI geöffnet/geschlossen werden, ist während des Programms verriegelt.
+4. Nach Programmende kann bei geöffneter Tür neue Wäsche eingelegt werden.
+5. Laufende Programme können jederzeit abgebrochen werden.
+6. Restlaufzeit, Temperatur und Feuchte werden live angezeigt.
 
 ## Lizenz
 
