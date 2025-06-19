@@ -4,6 +4,15 @@
 Technische Hochschule Deggendorf  
 Autor: Nico Dilger (22302719)
 
+## Voraussetzungen
+
+- **Java 17 (OpenJDK 17):**  
+  Das Projekt benötigt OpenJDK 17.  
+  Installation auf Debian-basierten Systemen:
+  ```sh
+  sudo apt install openjdk-17-jdk
+  ```
+
 ## Projektbeschreibung
 
 Dieses Projekt simuliert die Steuerung und Bedienung eines Wäschetrockners mit grafischer Benutzeroberfläche. Es können verschiedene Trockenprogramme ausgewählt, der Türstatus gesteuert und Sicherheitsmechanismen wie Türverriegelung und Überhitzungsschutz getestet werden.
