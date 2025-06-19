@@ -9,7 +9,7 @@ package clothdryer;
 public class SafetyModule {
     private final DryerState dryerState;
     private static final double OVERHEAT_THRESHOLD = 100.0;
-    private static final double SAFE_DOOR_TEMPERATURE = 40.0;
+    public static final double SAFE_DOOR_TEMPERATURE = 40.0;
 
     /**
      * Constructs a SafetyModule for the given dryer state.

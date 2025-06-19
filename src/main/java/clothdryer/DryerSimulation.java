@@ -152,7 +152,7 @@ public class DryerSimulation {
                     safetyModule.updateDoorLock();
                 }
             } else if (dryerState.getStatus() == ProgramStatus.COOLING) {
-                if (dryerState.getTemperature() > 40.0) {
+                if (dryerState.getTemperature() > SafetyModule.SAFE_DOOR_TEMPERATURE) {
                     dryerState.setDoorLocked(true);
                 } else {
                     dryerState.setDoorLocked(false);

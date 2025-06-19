@@ -27,7 +27,7 @@ public class DryerSimulationTest {
         assertEquals(DryerState.ProgramStatus.IDLE, dryerState.getStatus(), "Initialer Status sollte IDLE sein");
         assertEquals(0, dryerState.getRemainingSeconds(), "Initiale Restzeit sollte 0 sein");
         assertEquals(0, dryerState.getTemperature(), "Initiale Temperatur sollte 0 sein");
-        assertEquals(100.0, dryerState.getHumidity(), "Initiale Feuchtigkeit sollte 0 sein");
+        assertEquals(100.0, dryerState.getHumidity(), "Initiale Feuchtigkeit sollte 100 sein");
     }
 
     @Test

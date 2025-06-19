@@ -2,6 +2,7 @@ package clothdryer.scenes;
 
 import clothdryer.DryerState;
 import clothdryer.ProgramManager;
+import clothdryer.SafetyModule;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -135,7 +136,7 @@ public class ProgramSelectionScene {
         doorStatusLabel.setText(getDoorStatusText());
         doorButton.setText(getDoorButtonText());
         
-        if (programManager.getState().getTemperature() > 40.0) {
+        if (programManager.getState().getTemperature() > SafetyModule.SAFE_DOOR_TEMPERATURE) {
             doorButton.setDisable(true);
             doorStatusLabel.setText("Am abkühlen, bitte warten ...");
         } else {
