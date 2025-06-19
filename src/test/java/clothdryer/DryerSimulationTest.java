@@ -52,10 +52,11 @@ public class DryerSimulationTest {
         simulation.startProgram("cotton");
         simulation.stopProgram();
 
-        assertEquals(DryerState.ProgramStatus.IDLE, dryerState.getStatus(), "Status sollte nach Stop READY sein");
+        assertEquals(DryerState.ProgramStatus.IDLE, dryerState.getStatus(), "Status sollte nach Stop IDLE sein");
 
+        int remainingSeconds = dryerState.getRemainingSeconds();
         // Überprüfen, ob die Restzeit zurückgesetzt wurde
-        assertEquals(0, dryerState.getRemainingSeconds(), "Restzeit sollte nach Stop 0 sein");
+        assertEquals(0, remainingSeconds, "Restzeit sollte nach Stop 0 sein");
     }
 
     @Test
@@ -153,28 +154,31 @@ public class DryerSimulationTest {
         // Setup: Start mit hoher Feuchtigkeit
         dryerState.setHumidity(80.0);
         dryerState.setProgramName("cotton");
-        dryerState.setStatus(DryerState.ProgramStatus.RUNNING);
-        dryerState.setRemainingSeconds(3600);
+        simulation.startProgram("cotton");
 
         // Action: Simulation mit schneller Trocknung
-        simulation.setHumidityDecreaseRate(2.0); // Schnellere Trocknung simulieren
+        simulation.setHumidityDecreaseRate(5.0); // Schnellere Trocknung simulieren
         simulation.updateState(10000); // 10 Sekunden simulieren
 
         // Speichere die Restzeit
         int remainingAfterFastDrying = dryerState.getRemainingSeconds();
 
+        simulation.stopProgram();
+
         // Reset für Vergleich
         dryerState.setHumidity(80.0);
         dryerState.setProgramName("cotton");
-        dryerState.setStatus(DryerState.ProgramStatus.RUNNING);
+        simulation.startProgram("cotton");
         dryerState.setRemainingSeconds(3600);
 
         // Action: Simulation mit langsamer Trocknung
         simulation.setHumidityDecreaseRate(0.5); // Langsamere Trocknung simulieren
         simulation.updateState(10000); // 10 Sekunden simulieren
 
+        int remainingAfterSlowDrying = dryerState.getRemainingSeconds();
+
         // Verification: Bei schnellerer Trocknung sollte die Restzeit kürzer sein
-        assertTrue(remainingAfterFastDrying < dryerState.getRemainingSeconds(),
+        assertTrue(remainingAfterFastDrying < remainingAfterSlowDrying,
                 "Schnellere Trocknung sollte zu kürzerer Restzeit führen");
     }
 

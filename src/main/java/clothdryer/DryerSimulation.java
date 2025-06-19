@@ -60,6 +60,8 @@ public class DryerSimulation {
         
         // Status auf FINISHED setzen (oder IDLE, je nach Anforderung)
         dryerState.setStatus(ProgramStatus.IDLE);
+
+        dryerState.setRemainingSeconds(0);
         
         // Türverriegelung aktualisieren
         safetyModule.updateDoorLock();
