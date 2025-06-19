@@ -1,6 +1,82 @@
 # SoftwareEngineeringWaeschetrockner
-Projektarbeit KI-4 Software Engineering
-an der technischen Hochschule Deggendorf
 
-Nico Dilger
-22302719
+**Projektarbeit KI-4 Software Engineering**  
+Technische Hochschule Deggendorf  
+Autor: Nico Dilger (22302719)
+
+## Projektbeschreibung
+
+Dieses Projekt simuliert die Steuerung und Bedienung eines Wäschetrockners mit grafischer Benutzeroberfläche. Es können verschiedene Trockenprogramme ausgewählt, der Türstatus gesteuert und Sicherheitsmechanismen wie Türverriegelung und Überhitzungsschutz getestet werden.
+
+## Features
+
+- Auswahl verschiedener Trockenprogramme (Baumwolle, Synthetik, Wolle)
+- Simulation von Temperatur- und Feuchtigkeitsverlauf
+- Türsteuerung mit Verriegelung und Sicherheitsprüfung
+- Ereignis- und Fehlerprotokollierung
+- JavaFX-Benutzeroberfläche
+- Umfangreiche Unit- und GUI-Tests
+
+## Verwendete Technologien & Bibliotheken
+
+- **Java 21**  
+  Hauptprogrammiersprache für die gesamte Logik und GUI.
+
+- **Gradle**  
+  Build- und Dependency-Management (siehe [`build.gradle.kts`](build.gradle.kts)).
+
+- **JavaFX**  
+  Für die grafische Benutzeroberfläche (GUI).
+
+- **JUnit 5**  
+  Für Unit-Tests der Kernlogik.
+
+- **TestFX**  
+  Für automatisierte GUI-Tests.
+
+## Projektstruktur
+
+```
+src/
+  main/
+    java/clothdryer/           # Hauptlogik (Simulation, State, Safety, Manager)
+    java/clothdryer/scenes/    # JavaFX-GUI-Szenen
+  test/
+    java/clothdryer/           # Unit-Tests
+    java/clothdryer/scenes/    # GUI-Tests
+```
+
+## Installation & Ausführung
+
+1. **Voraussetzungen:**  
+   - Java 21 oder neuer  
+   - Gradle (Wrapper ist enthalten, keine lokale Installation nötig)
+
+2. **Build & Start:**  
+   Im Projektverzeichnis ausführen:
+   ```sh
+   ./gradlew build
+   ./gradlew run
+   ```
+
+3. **Tests ausführen:**  
+   ```sh
+   ./gradlew test
+   ```
+
+## Bedienung
+
+- Nach dem Start erscheint die Programmauswahl.
+- Die Tür kann geöffnet/geschlossen werden, neue Wäsche kann eingelegt werden.
+- Ein Programm kann nur bei geschlossener Tür gestartet werden.
+- Während des Programms ist die Tür verriegelt.
+- Das Programm kann jederzeit abgebrochen werden.
+
+## Lizenz
+
+Dieses Projekt steht unter der [GNU Affero General Public License v3.0](LICENSE).
+
+---
+
+**Kontakt:**  
+Für Fragen oder Feedback: [nico.dilger@stud.th-deg.de](mailto:nico.dilger@stud.th-deg.de)
