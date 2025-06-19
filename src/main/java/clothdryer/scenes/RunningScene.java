@@ -145,7 +145,9 @@ public class RunningScene {
         return switch (status) {
             case IDLE -> "Bereit";
             case RUNNING -> "Läuft";
+            case COOLING -> "Kühlt ab...";
             case ERROR -> "Fehler";
+            case DOOR_OPEN -> "Tür geöffnet";
             default -> "Unbekannt";
         };
     }

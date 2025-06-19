@@ -1,5 +1,6 @@
 package clothdryer.scenes;
 
+import clothdryer.DryerState;
 import clothdryer.ProgramManager;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
@@ -33,6 +34,10 @@ public class ProgramSelectionScene {
     private Button woolButton;
     private Button loadLaundryButton;
     private Timeline updateTimeline;
+
+    private Label statusLabel;
+    private Label tempLabel;
+    private Label humidityLabel;
 
     /**
      * Constructs a new ProgramSelectionScene.
@@ -93,10 +98,16 @@ public class ProgramSelectionScene {
         // Initially disable button, will be updated in updateDoorControls()
         loadLaundryButton.setDisable(true);
 
+        VBox infoBox = new VBox(5);
+        statusLabel = new Label();
+        tempLabel = new Label();
+        humidityLabel = new Label();
+        infoBox.getChildren().addAll(statusLabel, tempLabel, humidityLabel);
+
         HBox doorControls = new HBox(10, doorStatusLabel, doorButton);
         doorControls.setAlignment(Pos.CENTER);
 
-        VBox layout = new VBox(15, headline, cottonButton, syntheticButton, woolButton, loadLaundryButton, doorControls);
+        VBox layout = new VBox(15, headline, cottonButton, syntheticButton, woolButton, loadLaundryButton, doorControls, infoBox);
         layout.setStyle("-fx-padding: 20; -fx-alignment: center");
         startUpdateTimeline();
         return new Scene(layout, 400, 300);
@@ -123,7 +134,13 @@ public class ProgramSelectionScene {
     private void updateDoorControls() {
         doorStatusLabel.setText(getDoorStatusText());
         doorButton.setText(getDoorButtonText());
-        doorButton.setDisable(programManager.isDoorLocked());
+        
+        if (programManager.getState().getTemperature() > 40.0) {
+            doorButton.setDisable(true);
+            doorStatusLabel.setText("Am abkühlen, bitte warten ...");
+        } else {
+            doorButton.setDisable(programManager.isDoorLocked());
+        }
         
         // Enable the load laundry button only when door is open
         boolean doorOpen = !programManager.isDoorClosed();
@@ -134,6 +151,11 @@ public class ProgramSelectionScene {
         cottonButton.setDisable(!doorClosed);
         syntheticButton.setDisable(!doorClosed);
         woolButton.setDisable(!doorClosed);
+
+        DryerState state = programManager.getState();
+        statusLabel.setText("Status: " + formatStatus(state.getStatus()));
+        tempLabel.setText(String.format("Temperatur: %.1f °C", state.getTemperature()));
+        humidityLabel.setText(String.format("Restfeuchte: %.1f%%", state.getHumidity()));
     }
 
     /**
@@ -176,5 +198,16 @@ public class ProgramSelectionScene {
         woolButton.setDisable(!doorClosed);
 
         updateDoorControls();
+    }
+
+    private String formatStatus(DryerState.ProgramStatus status) {
+        return switch (status) {
+            case IDLE -> "Bereit";
+            case RUNNING -> "Läuft";
+            case COOLING -> "Kühlt ab...";
+            case ERROR -> "Fehler";
+            case DOOR_OPEN -> "Tür geöffnet";
+            default -> "Unbekannt";
+        };
     }
 }

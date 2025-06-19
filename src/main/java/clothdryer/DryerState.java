@@ -43,7 +43,7 @@ public class DryerState {
      * Enum representing the possible program statuses.
      */
     public enum ProgramStatus {
-        IDLE, RUNNING, ERROR, DOOR_OPEN
+        IDLE, RUNNING, COOLING, ERROR, DOOR_OPEN
     }
     
     /**

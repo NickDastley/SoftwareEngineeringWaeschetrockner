@@ -20,6 +20,7 @@ public class DryerSimulation {
 
     private static final double TEMP_INCREASE_RATE = 2.0;
     private static final double TEMP_DECREASE_RATE = 0.8;
+    private static final double TEMP_COOLING_RATE = 3.0; // Fast cooling
 
     private static final int TIME_COTTON = 3600;    // 60 minutes
     private static final int TIME_SYNTHETIC = 2700; // 45 minutes
@@ -54,17 +55,17 @@ public class DryerSimulation {
         if (!safetyModule.isOperationAllowed()) {
             throw new IllegalStateException("Operation not allowed: Door is open or locked.");
         }
-        
-        // Complete reset of all state variables
-        dryerState.setTemperature(0.0);
-        
+
+        // Remove this line to keep the current temperature:
+        // dryerState.setTemperature(0.0);
+
         // Configure program parameters to set the correct duration
         configureProgramParameters(programName);
-        
+
         // Set status to RUNNING after configuration
         dryerState.setStatus(ProgramStatus.RUNNING);
         safetyModule.updateDoorLock();
-        
+
         // Log program start
         dryerState.logEvent(DryerState.EventType.INFO, programName + " program started");
     }
@@ -132,9 +133,9 @@ public class DryerSimulation {
                 heatingActive = false;
             }
             
+            // Always update temperature, even when idle, to allow cooling
             updateTemperature(elapsedTimeMs / 1000.0);
-            
-            // Only update humidity and remaining time if running
+
             if (dryerState.getStatus() == ProgramStatus.RUNNING) {
                 updateHumidity(elapsedTimeMs / 1000.0);
                 updateRemainingTime(elapsedTimeMs / 1000.0);
@@ -144,7 +145,19 @@ public class DryerSimulation {
                     return;
                 }
                 
-                checkProgramFinished();
+                boolean programFinished = checkProgramFinished();
+                if (programFinished) {
+                    dryerState.setStatus(ProgramStatus.COOLING);
+                    heatingActive = false;
+                    safetyModule.updateDoorLock();
+                }
+            } else if (dryerState.getStatus() == ProgramStatus.COOLING) {
+                if (dryerState.getTemperature() > 40.0) {
+                    dryerState.setDoorLocked(true);
+                } else {
+                    dryerState.setDoorLocked(false);
+                    dryerState.setStatus(ProgramStatus.IDLE);
+                }
             }
         }
         
@@ -166,7 +179,10 @@ public class DryerSimulation {
             }
         } else {
             if (currentTemp > 0) {
-                double newTemp = currentTemp - (TEMP_DECREASE_RATE * elapsedTimeSec);
+                double coolingRate = dryerState.getStatus() == DryerState.ProgramStatus.COOLING
+                    ? TEMP_COOLING_RATE
+                    : TEMP_DECREASE_RATE;
+                double newTemp = currentTemp - (coolingRate * elapsedTimeSec);
                 dryerState.setTemperature(Math.max(0, newTemp));
             }
         }
@@ -240,12 +256,14 @@ public class DryerSimulation {
      * Checks if the program should finish based on humidity or time.
      * Sets status to IDLE and disables heating if finished.
      */
-    private void checkProgramFinished() {
+    private boolean checkProgramFinished() {
         if (dryerState.getHumidity() <= TARGET_HUMIDITY || dryerState.getRemainingSeconds() <= 0) {
             dryerState.setStatus(ProgramStatus.IDLE);
             heatingActive = false;
             safetyModule.updateDoorLock();
+            return true;
         }
+        return false;
     }
 
     public boolean tryOpenDoor() {
