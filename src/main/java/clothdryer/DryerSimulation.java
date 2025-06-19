@@ -164,7 +164,6 @@ public class DryerSimulation {
             // For first call, just decrease time linearly
             int remainingTime = dryerState.getRemainingSeconds();
             dryerState.setRemainingSeconds(Math.max(0, (int)(remainingTime - elapsedTimeSec)));
-            return;
         }
         
         double timeDelta = currentTime - previousUpdateTime;
