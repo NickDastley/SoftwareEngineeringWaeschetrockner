@@ -111,7 +111,8 @@ public class ProgramSelectionScene {
         VBox layout = new VBox(15, headline, cottonButton, syntheticButton, woolButton, loadLaundryButton, doorControls, infoBox);
         layout.setStyle("-fx-padding: 20; -fx-alignment: center");
         startUpdateTimeline();
-        return new Scene(layout, 400, 300);
+        Scene scene = new Scene(layout, 400, 420); // Increased height from e.g. 300/350 to 420
+        return scene;
     }
 
     /**
