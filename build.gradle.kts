@@ -25,7 +25,7 @@ tasks.test {
     useJUnitPlatform()
 }
 
-jar {
+tasks.jar {
     manifest {
         attributes(
             "Main-Class" to "clothdryer.Main"
