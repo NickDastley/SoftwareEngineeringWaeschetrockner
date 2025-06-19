@@ -74,7 +74,7 @@ public class RunningScene {
         temperature.setText("Temperatur: " + String.format("%.1f °C", state.getTemperature()));
 
         // Wenn das Programm fertig oder fehlerhaft ist, zur Auswahlszene zurückkehren
-        if (state.getStatus() == DryerState.ProgramStatus.FINISHED ||
+        if (state.getStatus() == DryerState.ProgramStatus.IDLE ||
                 state.getStatus() == DryerState.ProgramStatus.ERROR) {
 
             if (updateTimeline != null) {
@@ -102,7 +102,6 @@ public class RunningScene {
         return switch (status) {
             case IDLE -> "Bereit";
             case RUNNING -> "Läuft";
-            case FINISHED -> "Abgeschlossen";
             case ERROR -> "Fehler";
             default -> "Unbekannt";
         };

@@ -1,22 +1,41 @@
 package clothdryer;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 public class DryerState {
 
     private String programName = "None";
     public enum ProgramStatus {
-        IDLE, RUNNING, FINISHED, ERROR, DOOR_OPEN
+        IDLE, RUNNING, ERROR, DOOR_OPEN
     }
+    
+    public enum EventType {
+        INFO, WARNING, ERROR
+    }
+    
     private ProgramStatus status;
     private int remainingSeconds = 0;
     private double temperature = 0.0;
     private double humidity = 100.0;
     private boolean doorClosed = true;
     private boolean doorLocked = false;
+    
+    // Error and event handling
+    private String currentError = null;
+    private static final int MAX_EVENT_HISTORY = 100;
+    private final List<DryerEvent> eventHistory = new ArrayList<>();
+    private static final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public DryerState() {
         status = ProgramStatus.IDLE;
     }
 
+    // Existing getters and setters...
+    
     public synchronized String getProgramName() {
         return programName;
     }
@@ -71,5 +90,106 @@ public class DryerState {
 
     public synchronized boolean isDoorLocked() {
         return doorLocked;
+    }
+    
+    // New error and event handling methods
+    
+    /**
+     * Gets the current error message if there is one
+     * @return The current error message or null if no error
+     */
+    public synchronized String getError() {
+        return currentError;
+    }
+    
+    /**
+     * Sets the current error and logs it to the event history
+     * @param error The error message
+     */
+    public synchronized void setError(String error) {
+        this.currentError = error;
+        if (error != null) {
+            logEvent(EventType.ERROR, error);
+            setStatus(ProgramStatus.ERROR);
+        }
+    }
+    
+    /**
+     * Clears the current error
+     */
+    public synchronized void clearError() {
+        this.currentError = null;
+    }
+    
+    /**
+     * Logs an event to the event history
+     * @param type The type of event (INFO, WARNING, ERROR)
+     * @param message The event message
+     */
+    public synchronized void logEvent(EventType type, String message) {
+        DryerEvent event = new DryerEvent(type, message);
+        eventHistory.add(event);
+        
+        // Keep history size limited
+        if (eventHistory.size() > MAX_EVENT_HISTORY) {
+            eventHistory.remove(0);
+        }
+        
+        // TODO: In the future, this is where we would add actual logging to files
+    }
+    
+    /**
+     * Gets the event history as an unmodifiable list
+     * @return The event history
+     */
+    public synchronized List<DryerEvent> getEventHistory() {
+        return Collections.unmodifiableList(eventHistory);
+    }
+    
+    /**
+     * Gets the most recent events up to the specified count
+     * @param count The maximum number of events to return
+     * @return The most recent events
+     */
+    public synchronized List<DryerEvent> getRecentEvents(int count) {
+        int startIndex = Math.max(0, eventHistory.size() - count);
+        return Collections.unmodifiableList(
+            eventHistory.subList(startIndex, eventHistory.size())
+        );
+    }
+    
+    /**
+     * Class representing a dryer event
+     */
+    public static class DryerEvent {
+        private final EventType type;
+        private final String message;
+        private final LocalDateTime timestamp;
+        
+        public DryerEvent(EventType type, String message) {
+            this.type = type;
+            this.message = message;
+            this.timestamp = LocalDateTime.now();
+        }
+        
+        public EventType getType() {
+            return type;
+        }
+        
+        public String getMessage() {
+            return message;
+        }
+        
+        public LocalDateTime getTimestamp() {
+            return timestamp;
+        }
+        
+        @Override
+        public String toString() {
+            return String.format("[%s] %s: %s", 
+                timestamp.format(timeFormatter),
+                type.toString(), 
+                message);
+        }
     }
 }

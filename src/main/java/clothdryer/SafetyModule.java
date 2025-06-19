@@ -14,7 +14,11 @@ public class SafetyModule {
      * @return true, wenn der Betrieb sicher ist, sonst false
      */
     public boolean isOperationAllowed() {
-        return dryerState.isDoorClosed();
+        boolean allowed = dryerState.isDoorClosed();
+        if (!allowed) {
+            dryerState.logEvent(DryerState.EventType.WARNING, "Operation not allowed: Door is open");
+        }
+        return allowed;
     }
 
     /**
@@ -22,7 +26,14 @@ public class SafetyModule {
      */
     public void updateDoorLock() {
         boolean shouldBeLocked = dryerState.getStatus() == DryerState.ProgramStatus.RUNNING;
+        boolean wasLocked = dryerState.isDoorLocked();
         dryerState.setDoorLocked(shouldBeLocked);
+        
+        if (shouldBeLocked && !wasLocked) {
+            dryerState.logEvent(DryerState.EventType.INFO, "Door locked for program execution");
+        } else if (!shouldBeLocked && wasLocked) {
+            dryerState.logEvent(DryerState.EventType.INFO, "Door unlocked");
+        }
     }
 
     /**
@@ -31,6 +42,13 @@ public class SafetyModule {
      */
     public boolean tryOpenDoor() {
         if (dryerState.isDoorLocked()) {
+            dryerState.logEvent(DryerState.EventType.WARNING, "Cannot open door: Door is locked");
+            return false;
+        }
+
+        if (!isSafeToOpen()) {
+            dryerState.logEvent(DryerState.EventType.WARNING, "Cannot open door: Temperature too high (" + 
+                dryerState.getTemperature() + "°C)");
             return false;
         }
 
@@ -38,6 +56,7 @@ public class SafetyModule {
         if (dryerState.getStatus() != DryerState.ProgramStatus.ERROR) {
             dryerState.setStatus(DryerState.ProgramStatus.DOOR_OPEN);
         }
+        dryerState.logEvent(DryerState.EventType.INFO, "Door opened");
         return true;
     }
 
@@ -46,6 +65,7 @@ public class SafetyModule {
         if (dryerState.getStatus() == DryerState.ProgramStatus.DOOR_OPEN) {
             dryerState.setStatus(DryerState.ProgramStatus.IDLE);
         }
+        dryerState.logEvent(DryerState.EventType.INFO, "Door closed");
     }
 
     public boolean isSafeToOpen() {
@@ -53,6 +73,11 @@ public class SafetyModule {
     }
 
     public boolean isOverheating() {
-        return dryerState.getTemperature() > OVERHEAT_THRESHOLD;
+        boolean isOverheating = dryerState.getTemperature() >= OVERHEAT_THRESHOLD;
+        if (isOverheating) {
+            dryerState.setStatus(DryerState.ProgramStatus.ERROR);
+            dryerState.setError("Overheating detected! Temperature: " + dryerState.getTemperature());
+        }
+        return isOverheating;
     }
 }

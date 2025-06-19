@@ -79,5 +79,17 @@ public class ProgramManager implements Runnable {
     public boolean isDoorClosed() {
         return simulation.isDoorClosed();
     }
+
+    /**
+     * Simulates loading new laundry, resetting humidity values.
+     * @return true if successful, false if door is closed
+     */
+    public boolean loadNewLaundry() {
+        if (!isDoorClosed()) {
+            simulation.loadNewLaundry();
+            return true;
+        }
+        return false;
+    }
 }
 

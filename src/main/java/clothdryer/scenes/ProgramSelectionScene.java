@@ -23,6 +23,7 @@ public class ProgramSelectionScene {
     private Button cottonButton;
     private Button syntheticButton;
     private Button woolButton;
+    private Button loadLaundryButton;
     private Timeline updateTimeline;
 
     public ProgramSelectionScene(Stage stage, ProgramManager programManager) {
@@ -56,11 +57,27 @@ public class ProgramSelectionScene {
         doorStatusLabel = new Label(getDoorStatusText());
         doorButton = new Button(getDoorButtonText());
         doorButton.setOnAction(e -> toggleDoorState());
+        
+        // Add new laundry load button
+        loadLaundryButton = new Button("Neue Wäsche einlegen");
+        loadLaundryButton.setOnAction(e -> {
+            if (programManager.loadNewLaundry()) {
+                // Show confirmation message
+                loadLaundryButton.setText("✓ Wäsche eingelegt");
+                // Reset text after 2 seconds
+                new javafx.animation.Timeline(
+                    new javafx.animation.KeyFrame(javafx.util.Duration.seconds(2), 
+                    event -> loadLaundryButton.setText("Neue Wäsche einlegen"))
+                ).play();
+            }
+        });
+        // Initially disable button, will be updated in updateDoorControls()
+        loadLaundryButton.setDisable(true);
 
         HBox doorControls = new HBox(10, doorStatusLabel, doorButton);
         doorControls.setAlignment(Pos.CENTER);
 
-        VBox layout = new VBox(15, headline, cottonButton, syntheticButton, woolButton, doorControls);
+        VBox layout = new VBox(15, headline, cottonButton, syntheticButton, woolButton, loadLaundryButton, doorControls);
         layout.setStyle("-fx-padding: 20; -fx-alignment: center");
         startUpdateTimeline();
         return new Scene(layout, 400, 300);
@@ -81,6 +98,16 @@ public class ProgramSelectionScene {
         doorStatusLabel.setText(getDoorStatusText());
         doorButton.setText(getDoorButtonText());
         doorButton.setDisable(programManager.isDoorLocked());
+        
+        // Enable the load laundry button only when door is open
+        boolean doorOpen = !programManager.isDoorClosed();
+        loadLaundryButton.setDisable(!doorOpen);
+        
+        // Also update program buttons based on door state
+        boolean doorClosed = programManager.isDoorClosed();
+        cottonButton.setDisable(!doorClosed);
+        syntheticButton.setDisable(!doorClosed);
+        woolButton.setDisable(!doorClosed);
     }
 
     private String getDoorStatusText() {
