@@ -2,6 +2,12 @@ package clothdryer;
 
 import clothdryer.DryerState.ProgramStatus;
 
+/**
+ * DryerSimulation simulates the drying process for different laundry programs.
+ * It manages temperature, humidity, remaining time, and interacts with the SafetyModule
+ * to ensure safe operation. The simulation updates the dryer state based on the selected
+ * program and elapsed time.
+ */
 public class DryerSimulation {
 
     private static final double HUMIDITY_DECREASE_RATE_COTTON = 0.8;
@@ -15,9 +21,9 @@ public class DryerSimulation {
     private static final double TEMP_INCREASE_RATE = 2.0;
     private static final double TEMP_DECREASE_RATE = 0.8;
 
-    private static final int TIME_COTTON = 3600;    // 60 Minuten
-    private static final int TIME_SYNTHETIC = 2700; // 45 Minuten
-    private static final int TIME_WOOL = 1800;      // 30 Minuten
+    private static final int TIME_COTTON = 3600;    // 60 minutes
+    private static final int TIME_SYNTHETIC = 2700; // 45 minutes
+    private static final int TIME_WOOL = 1800;      // 30 minutes
 
     private final DryerState dryerState;
     private final SafetyModule safetyModule;
@@ -30,11 +36,20 @@ public class DryerSimulation {
     private double previousUpdateTime;
     private static final double TARGET_HUMIDITY = 5.0; // Program finishes when humidity reaches this level
 
+    /**
+     * Constructs a DryerSimulation with the given dryer state and safety module.
+     * @param dryerState the state object representing the dryer's current state
+     * @param safetyModule the safety module for door and overheating checks
+     */
     public DryerSimulation(DryerState dryerState, SafetyModule safetyModule) {
         this.dryerState = dryerState;
         this.safetyModule = safetyModule;
     }
 
+    /**
+     * Starts a drying program by configuring parameters and setting the state to RUNNING.
+     * @param programName the name of the selected program ("cotton", "synthetic", "wool")
+     */
     public void startProgram(String programName) {
         if (!safetyModule.isOperationAllowed()) {
             throw new IllegalStateException("Operation not allowed: Door is open or locked.");
@@ -54,20 +69,28 @@ public class DryerSimulation {
         dryerState.logEvent(DryerState.EventType.INFO, programName + " program started");
     }
 
+    /**
+     * Stops the current program, disables heating, and sets the status to IDLE.
+     */
     public void stopProgram() {
-        // Heizung ausschalten
+        // Turn off heating
         heatingActive = false;
         
-        // Status auf FINISHED setzen (oder IDLE, je nach Anforderung)
+        // Set status to IDLE
         dryerState.setStatus(ProgramStatus.IDLE);
 
         dryerState.setRemainingSeconds(0);
         
-        // Türverriegelung aktualisieren
+        // Update door lock status
         safetyModule.updateDoorLock();
         
         dryerState.logEvent(DryerState.EventType.INFO, "Program stopped");
     }
+
+    /**
+     * Configures simulation parameters for the selected program.
+     * @param programName the name of the program
+     */
     private void configureProgramParameters(String programName) {
         switch (programName) {
             case "cotton" -> {
@@ -95,20 +118,23 @@ public class DryerSimulation {
         heatingActive = true;
     }
     
-
+    /**
+     * Updates the simulation state based on elapsed time.
+     * @param elapsedTimeMs elapsed time in milliseconds since last update
+     */
     public void updateState(int elapsedTimeMs) {
-        // Wenn das Programm läuft oder fertig ist, Werte aktualisieren
+        // If the program is running or idle, update values
         if (dryerState.getStatus() == ProgramStatus.RUNNING || 
             dryerState.getStatus() == ProgramStatus.IDLE) {
             
-            // Bei IDLE keine Heizung mehr
+            // No heating when idle
             if (dryerState.getStatus() == ProgramStatus.IDLE) {
                 heatingActive = false;
             }
             
             updateTemperature(elapsedTimeMs / 1000.0);
             
-            // Nur bei laufendem Programm Feuchtigkeit und Restzeit aktualisieren
+            // Only update humidity and remaining time if running
             if (dryerState.getStatus() == ProgramStatus.RUNNING) {
                 updateHumidity(elapsedTimeMs / 1000.0);
                 updateRemainingTime(elapsedTimeMs / 1000.0);
@@ -122,10 +148,14 @@ public class DryerSimulation {
             }
         }
         
-        // Türverriegelung in jedem Fall aktualisieren
+        // Always update door lock status
         safetyModule.updateDoorLock();
     }
 
+    /**
+     * Updates the temperature based on heating state and elapsed time.
+     * @param elapsedTimeSec elapsed time in seconds
+     */
     private void updateTemperature(double elapsedTimeSec) {
         double currentTemp = dryerState.getTemperature();
 
@@ -142,6 +172,10 @@ public class DryerSimulation {
         }
     }
 
+    /**
+     * Updates the humidity based on heating state and elapsed time.
+     * @param elapsedTimeSec elapsed time in seconds
+     */
     private void updateHumidity(double elapsedTimeSec) {
         double currentHumidity = dryerState.getHumidity();
 
@@ -151,7 +185,10 @@ public class DryerSimulation {
         }
     }
 
-
+    /**
+     * Updates the remaining time estimate based on humidity decrease and elapsed time.
+     * @param elapsedTimeSec elapsed time in seconds
+     */
     private void updateRemainingTime(double elapsedTimeSec) {
         double currentTime = System.currentTimeMillis() / 1000.0;
         double currentHumidity = dryerState.getHumidity();
@@ -199,6 +236,10 @@ public class DryerSimulation {
         }
     }
 
+    /**
+     * Checks if the program should finish based on humidity or time.
+     * Sets status to IDLE and disables heating if finished.
+     */
     private void checkProgramFinished() {
         if (dryerState.getHumidity() <= TARGET_HUMIDITY || dryerState.getRemainingSeconds() <= 0) {
             dryerState.setStatus(ProgramStatus.IDLE);
@@ -207,43 +248,65 @@ public class DryerSimulation {
         }
     }
 
-    private void adjustRemainingTime(double factor) {
-        int currentTime = dryerState.getRemainingSeconds();
-        dryerState.setRemainingSeconds((int)(currentTime * factor));
-    }
-
     public boolean tryOpenDoor() {
         return safetyModule.tryOpenDoor();
     }
 
+    /**
+     * Closes the door using the safety module.
+     */
     public void closeDoor() {
         safetyModule.closeDoor();
     }
 
+    /**
+     * @return true if the door is locked
+     */
     public boolean isDoorLocked() {
         return dryerState.isDoorLocked();
     }
 
+    /**
+     * @return true if the door is closed
+     */
     public boolean isDoorClosed() {
         return dryerState.isDoorClosed();
     }
 
+    /**
+     * @return true if it is safe to open the door
+     */
     public boolean isSafeToOpen() {
         return safetyModule.isSafeToOpen();
     }
 
-        public boolean isHeatingActive() {
+    /**
+     * @return true if heating is currently active
+     */
+    public boolean isHeatingActive() {
         return heatingActive;
     }
 
+    /**
+     * Sets the heating active state.
+     * @param active true to activate heating, false to deactivate
+     */
     public void setHeatingActive(boolean active) {
         this.heatingActive = active;
     }
 
+    /**
+     * Sets the humidity decrease rate for the simulation.
+     * @param rate the new humidity decrease rate
+     */
     public void setHumidityDecreaseRate(double rate) {
         this.humidityDecreaseRate = rate;
     }
 
+    /**
+     * Loads new laundry if the door is open, resetting humidity to 100%.
+     * Logs an event if successful or if the door is closed.
+     */
     public void loadNewLaundry() {
         if (!dryerState.isDoorClosed()) {
             // Reset humidity to 100% for a new load of clothes

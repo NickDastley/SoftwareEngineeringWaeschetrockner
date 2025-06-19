@@ -13,6 +13,14 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
+/**
+ * The ProgramSelectionScene class represents the main selection screen
+ * for the dryer application. It allows the user to choose a drying program,
+ * open or close the door, and load new laundry.
+ * 
+ * The scene updates its controls dynamically based on the current state
+ * of the dryer (door open/closed/locked).
+ */
 public class ProgramSelectionScene {
 
     private final Stage stage;
@@ -26,11 +34,22 @@ public class ProgramSelectionScene {
     private Button loadLaundryButton;
     private Timeline updateTimeline;
 
+    /**
+     * Constructs a new ProgramSelectionScene.
+     * 
+     * @param stage the primary stage of the application
+     * @param programManager the manager handling dryer state and logic
+     */
     public ProgramSelectionScene(Stage stage, ProgramManager programManager) {
         this.stage = stage;
         this.programManager = programManager;
     }
 
+    /**
+     * Creates and returns the JavaFX Scene for program selection.
+     * 
+     * @return the program selection Scene
+     */
     public Scene getScene() {
         Label headline = new Label("Wähle ein Trockenprogramm:");
 
@@ -83,6 +102,10 @@ public class ProgramSelectionScene {
         return new Scene(layout, 400, 300);
     }
 
+    /**
+     * Starts a timeline that periodically updates the door controls and
+     * program buttons based on the current state.
+     */
     private void startUpdateTimeline() {
         updateTimeline = new Timeline(
                 new KeyFrame(Duration.seconds(0.5), event -> {
@@ -93,7 +116,10 @@ public class ProgramSelectionScene {
         updateTimeline.play();
     }
 
-
+    /**
+     * Updates the door status label, door button, and enables/disables
+     * program and laundry buttons according to the current door state.
+     */
     private void updateDoorControls() {
         doorStatusLabel.setText(getDoorStatusText());
         doorButton.setText(getDoorButtonText());
@@ -110,6 +136,11 @@ public class ProgramSelectionScene {
         woolButton.setDisable(!doorClosed);
     }
 
+    /**
+     * Returns a user-friendly string describing the current door status.
+     * 
+     * @return the door status text
+     */
     private String getDoorStatusText() {
         if (programManager.isDoorLocked()) {
             return "Tür: Verriegelt";
@@ -120,10 +151,18 @@ public class ProgramSelectionScene {
         }
     }
 
+    /**
+     * Returns the appropriate text for the door toggle button.
+     * 
+     * @return the door button text
+     */
     private String getDoorButtonText() {
         return programManager.isDoorClosed() ? "Tür öffnen" : "Tür schließen";
     }
 
+    /**
+     * Toggles the door state (open/close) and updates the controls.
+     */
     private void toggleDoorState() {
         if (programManager.isDoorClosed()) {
             programManager.tryOpenDoor();
