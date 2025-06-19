@@ -1,0 +1,36 @@
+Juni 19, 2025 4:37:15 PM clothdryer.DryerState logEvent
+INFORMATION: Door locked for program execution
+Juni 19, 2025 4:37:15 PM clothdryer.DryerState logEvent
+INFORMATION: wool program started
+Juni 19, 2025 4:37:19 PM clothdryer.DryerState logEvent
+INFORMATION: Door unlocked
+Juni 19, 2025 4:37:19 PM clothdryer.DryerState logEvent
+INFORMATION: Program stopped
+Juni 19, 2025 4:37:20 PM clothdryer.DryerState logEvent
+INFORMATION: Door locked for program execution
+Juni 19, 2025 4:37:20 PM clothdryer.DryerState logEvent
+INFORMATION: cotton program started
+Juni 19, 2025 4:39:18 PM clothdryer.DryerState logEvent
+INFORMATION: Door unlocked
+Juni 19, 2025 4:39:23 PM clothdryer.DryerState logEvent
+WARNUNG: Cannot open door: Temperature too high (71.79920000000001°C)
+Juni 19, 2025 4:39:25 PM clothdryer.DryerState logEvent
+WARNUNG: Cannot open door: Temperature too high (69.39840000000002°C)
+Juni 19, 2025 4:39:26 PM clothdryer.DryerState logEvent
+WARNUNG: Cannot open door: Temperature too high (69.39840000000002°C)
+Juni 19, 2025 4:39:26 PM clothdryer.DryerState logEvent
+WARNUNG: Cannot open door: Temperature too high (68.59840000000003°C)
+Juni 19, 2025 4:39:26 PM clothdryer.DryerState logEvent
+WARNUNG: Cannot open door: Temperature too high (68.59840000000003°C)
+Juni 19, 2025 4:39:27 PM clothdryer.DryerState logEvent
+WARNUNG: Cannot open door: Temperature too high (68.59840000000003°C)
+Juni 19, 2025 4:39:27 PM clothdryer.DryerState logEvent
+WARNUNG: Cannot open door: Temperature too high (67.79840000000003°C)
+Juni 19, 2025 4:39:27 PM clothdryer.DryerState logEvent
+WARNUNG: Cannot open door: Temperature too high (67.79840000000003°C)
+Juni 19, 2025 4:39:27 PM clothdryer.DryerState logEvent
+WARNUNG: Cannot open door: Temperature too high (67.79840000000003°C)
+Juni 19, 2025 4:39:27 PM clothdryer.DryerState logEvent
+WARNUNG: Cannot open door: Temperature too high (67.79840000000003°C)
+Juni 19, 2025 4:39:28 PM clothdryer.DryerState logEvent
+WARNUNG: Cannot open door: Temperature too high (67.79840000000003°C)

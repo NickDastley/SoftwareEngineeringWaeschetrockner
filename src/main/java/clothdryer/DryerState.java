@@ -1,10 +1,16 @@
 package clothdryer;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 /**
  * DryerState holds the current state of the dryer, including program name,
@@ -13,6 +19,23 @@ import java.util.List;
  * logging and retrieving events and errors.
  */
 public class DryerState {
+
+    private static final Logger LOGGER = Logger.getLogger(DryerState.class.getName());
+    private static FileHandler fileHandler;
+
+    static {
+        try {
+            // Create logs directory if it does not exist
+            Files.createDirectories(Path.of("logs"));
+            String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+            fileHandler = new FileHandler("logs/dryerlog_" + timestamp + ".log", true);
+            fileHandler.setFormatter(new SimpleFormatter());
+            LOGGER.addHandler(fileHandler);
+            LOGGER.setUseParentHandlers(false);
+        } catch (IOException e) {
+            System.err.println("Could not initialize log file: " + e.getMessage());
+        }
+    }
 
     private String programName = "None";
 
@@ -139,20 +162,25 @@ public class DryerState {
     }
     
     /**
-     * Logs an event to the event history.
+     * Logs an event to the event history and to the log file.
      * @param type The type of event (INFO, WARNING, ERROR)
      * @param message The event message
      */
     public synchronized void logEvent(EventType type, String message) {
         DryerEvent event = new DryerEvent(type, message);
         eventHistory.add(event);
-        
+
         // Limit the event history size
         if (eventHistory.size() > MAX_EVENT_HISTORY) {
             eventHistory.remove(0);
         }
-        
-        // Future improvement: add logging to files here
+
+        // Log to file
+        switch (type) {
+            case INFO -> LOGGER.info(message);
+            case WARNING -> LOGGER.warning(message);
+            case ERROR -> LOGGER.severe(message);
+        }
     }
     
     /**
