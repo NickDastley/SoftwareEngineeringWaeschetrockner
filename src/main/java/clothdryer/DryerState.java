@@ -6,13 +6,26 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * DryerState holds the current state of the dryer, including program name,
+ * status, temperature, humidity, door state, error messages, and event history.
+ * It provides synchronized access to all state variables and methods for
+ * logging and retrieving events and errors.
+ */
 public class DryerState {
 
     private String programName = "None";
+
+    /**
+     * Enum representing the possible program statuses.
+     */
     public enum ProgramStatus {
         IDLE, RUNNING, ERROR, DOOR_OPEN
     }
     
+    /**
+     * Enum representing the type of event for logging.
+     */
     public enum EventType {
         INFO, WARNING, ERROR
     }
@@ -30,12 +43,15 @@ public class DryerState {
     private final List<DryerEvent> eventHistory = new ArrayList<>();
     private static final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
+    /**
+     * Constructs a DryerState with default values (IDLE, 100% humidity, door closed).
+     */
     public DryerState() {
         status = ProgramStatus.IDLE;
     }
 
-    // Existing getters and setters...
-    
+    // Synchronized getters and setters for all state variables
+
     public synchronized String getProgramName() {
         return programName;
     }
@@ -92,10 +108,10 @@ public class DryerState {
         return doorLocked;
     }
     
-    // New error and event handling methods
-    
+    // Error and event handling methods
+
     /**
-     * Gets the current error message if there is one
+     * Gets the current error message if there is one.
      * @return The current error message or null if no error
      */
     public synchronized String getError() {
@@ -103,7 +119,8 @@ public class DryerState {
     }
     
     /**
-     * Sets the current error and logs it to the event history
+     * Sets the current error and logs it to the event history.
+     * Also sets the status to ERROR.
      * @param error The error message
      */
     public synchronized void setError(String error) {
@@ -115,14 +132,14 @@ public class DryerState {
     }
     
     /**
-     * Clears the current error
+     * Clears the current error.
      */
     public synchronized void clearError() {
         this.currentError = null;
     }
     
     /**
-     * Logs an event to the event history
+     * Logs an event to the event history.
      * @param type The type of event (INFO, WARNING, ERROR)
      * @param message The event message
      */
@@ -130,16 +147,16 @@ public class DryerState {
         DryerEvent event = new DryerEvent(type, message);
         eventHistory.add(event);
         
-        // Keep history size limited
+        // Limit the event history size
         if (eventHistory.size() > MAX_EVENT_HISTORY) {
             eventHistory.remove(0);
         }
         
-        // TODO: In the future, this is where we would add actual logging to files
+        // Future improvement: add logging to files here
     }
     
     /**
-     * Gets the event history as an unmodifiable list
+     * Gets the event history as an unmodifiable list.
      * @return The event history
      */
     public synchronized List<DryerEvent> getEventHistory() {
@@ -147,7 +164,7 @@ public class DryerState {
     }
     
     /**
-     * Gets the most recent events up to the specified count
+     * Gets the most recent events up to the specified count.
      * @param count The maximum number of events to return
      * @return The most recent events
      */
@@ -159,7 +176,7 @@ public class DryerState {
     }
     
     /**
-     * Class representing a dryer event
+     * Class representing a dryer event, including type, message, and timestamp.
      */
     public static class DryerEvent {
         private final EventType type;
